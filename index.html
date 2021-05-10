@@ -1,71 +1,174 @@
+<!--Marcelo Aceituno R
+	Full Stack JAVA 0034
+-->
 <html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-	<title>1942 Game</title>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>1942</title>
 
-<style type="text/css">
+	<style type="text/css">
 	body{
 		background-color:black;
+		margin: 0px auto;
 	}
-	#container{
-		background: url('background.jpg');
+	#contenedor{
+		background: url('mapa.jpg');
 		width:1000px;
-		height:550px;
+		height:550px;			
 	}
-	#hero{
+	#heroe{
 		background: url('1942.gif');
-		background-position: -85px -180px;
+		background-position: -85px -180px;	
+		background-repeat: no-repeat;		
+		width:28px;
+		height:28px;
+		position:absolute;				
+	}
+	#enemy{
+		background: url('1942.gif');
+		background-position: -30px -10px;			
 		width:28px;
 		height:28px;
 		position:absolute;
 	}
-	.enemy1{
-		background: url('1942.gif');
-		background-position: -30px -10px;
-		width:28px;
-		height:28px;
-		position:absolute;
-	}
-	.bullet{
+	#bala{
 		background: url('1942.gif');
 		background-position: -185px -400px;
 		width:18px;
 		height:18px;
 		position:absolute;
 	}
-	#score{
+	#puntaje{
 		position:absolute;
-		border:10px solid red;
-		top:20px;
-		left:800px;
-		background-color:white;
+		border:10px solid blue;
+		top:10px;
+		left:900px;
+		background-color: black;
 		padding:10px;
 		font-size:30px;
 		font-family: Arial;	
+		color : white;
 	}
+
 </style>
 </head>
+
 <body>
-	<div id='container'>
-		<div id='hero' style='top:300px; left:300px;'></div>
-		<div id='enemies'>
-			<div class='enemy1' style='top:100px; left:100px;'></div>
-			<div class='enemy1' style='top:100px; left:200px;'></div>
-			<div class='enemy1' style='top:100px; left:300px;'></div>
-			<div class='enemy1' style='top:100px; left:400px;'></div>
-		</div>
-		<div id='bullets'>
-			<div class='bullet' style='top:150px; left:200px;'></div>
-			<div class='bullet' style='top:250px; left:200px;'></div>
-			<div class='bullet' style='top:350px; left:200px;'></div>
-			<div class='bullet' style='top:450px; left:200px;'></div>
-		</div>	
+	
+	<div id='contenedor'>
+		<div id='heroe'></div>
+		<div id='enemy'></div>
+		<div id='bala'></div>
+		<div id='puntaje'>0</div>	
 	</div>
-
-	<div id='score'>100</div>
-
 
 <script>
 
+	var heroe = {
+		x: 300,
+		y: 500
+	}
+
+	var puntaje = 0;
+
+	var enemigos = [{x:50, y:150}, {x:250, y:50}, {x:450, y:250}, 
+					{x:650, y:50}, {x:850, y:30}];
+
+	var balas = [];
+
+	function muestraHeroe(){
+		document.getElementById('heroe').style['top'] = heroe.y + "px";
+		document.getElementById('heroe').style['left'] = heroe.x + "px";
+	}
+
+	function muestraEnemigos(){
+		var output = "";
+		for (var i=0; i<enemigos.length; i++){
+			output += "<div id='enemy' style='top:"+enemigos[i].y+"px; left:"+enemigos[i].x+"px;'></div>";
+		}
+		document.getElementById('enemy').innerHTML = output;		
+	}
+
+	function mueveEnemigos(){
+		for (var i=0; i<enemigos.length; i++){
+			enemigos[i].y += 5;
+
+			if (enemigos[i].y > 540){
+				enemigos[i].x = Math.random()*900;
+				enemigos[i].y = Math.random()*900;				
+			}
+		}	
+	}
+
+	function mueveBalas(){
+		for (var i=0; i<balas.length; i++){
+			balas[i].y -= 5;			
+
+			if (balas[i].y < 0){
+				balas[i] = balas[balas.length-1];
+				balas.pop();				
+			}
+		}
+	}
+
+	function muestraBalas(){
+		var output = '';
+		for (var i=0; i<balas.length; i++){
+			output += "<div id='bala' style='top:"+balas[i].y+"px; left:"+balas[i].x+"px;'></div>";
+		}
+		document.getElementById('bala').innerHTML = output;
+	}
+
+	function muestraPuntaje(){
+		document.getElementById('puntaje').innerHTML = puntaje;		
+	}
+	
+	function juegoLoop(){
+		muestraHeroe();
+		mueveEnemigos();
+		muestraEnemigos();
+		mueveBalas();	
+		muestraBalas();	
+		chocaBalas();
+		muestraPuntaje();
+	}
+
+	function chocaBalas(){
+		for (var i=0; i<balas.length; i++){
+			for (var j=0; j<enemigos.length; j++){
+
+				if (Math.abs(balas[i].x - enemigos[j].x < 2 && Math.abs(balas[i].y - enemigos[j].y) < 2)){
+					puntaje += 10;
+				}
+			}
+		}
+	}
+
+	setInterval(juegoLoop, 50);
+
+	document.onkeydown = function(a){
+		
+		if(a.keyCode == 37){
+			heroe.x -= 10;			
+		}
+		else if(a.keyCode == 39){
+			heroe.x  += 10;
+		}
+		else if(a.keyCode == 38){
+			heroe.y -= 10;
+		}
+		else if(a.keyCode == 40){
+			heroe.y += 10;
+		}
+		else if(a.keyCode == 32){
+			balas.push({x: heroe.x, y: heroe.y-15});			
+			muestraBalas();
+		}		
+	}
 </script>
 
 </body>
